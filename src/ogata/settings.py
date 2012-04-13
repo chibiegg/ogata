@@ -143,3 +143,9 @@ LOGGING = {
         },
     }
 }
+
+
+
+SSO_PASSWORD_KEY = "N(4)W83weX+3wVmE"
+
+
