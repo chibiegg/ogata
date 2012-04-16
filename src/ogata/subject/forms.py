@@ -13,9 +13,8 @@ class RegistrationForm(forms.ModelForm):
     
     class Meta:
         model = Student
-        fields = ["username","roleId","email",]
+        fields = ["username","email",]
     
-    passwd = forms.CharField(label=u"パスワード",widget=forms.PasswordInput(render_value=True))
     sso_passwd = forms.CharField(label=u"SSOパスワード",widget=forms.PasswordInput(render_value=True))
     
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, 
@@ -26,13 +25,13 @@ class RegistrationForm(forms.ModelForm):
                                                error_class=error_class, label_suffix=label_suffix,
                                                 empty_permitted=empty_permitted, instance=instance)
         #一部の表示を変更
-        self.fields["username"].label = u"希望ユーザー名"
+        self.fields["username"].label = u"大学個人ID"
         self.fields["username"].help_text = u""
         self.fields["email"].label = u"メールアドレス"
         
         #表示順序の並び替え
         new_fields = SortedDict()
-        fields = ("username","passwd","email","roleId","sso_passwd")
+        fields = ("username","sso_passwd","email",)
         for field in fields:
             new_fields[field] = self.fields[field]
         self.fields = new_fields
@@ -41,12 +40,12 @@ class RegistrationForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super(RegistrationForm,self).clean()
         
-        if "roleId" in cleaned_data and "sso_passwd" in cleaned_data:
+        if "username" in cleaned_data and "sso_passwd" in cleaned_data:
             #SSOログインチェック
             try:
-                client = KoanClient(cleaned_data["roleId"],cleaned_data["sso_passwd"])
+                client = KoanClient(cleaned_data["username"],cleaned_data["sso_passwd"])
             except KoanClient.LoginException:
-                self.errors["roleId"] = self.error_class([u"個人IDまたは、SSOパスワードが異なります"])
+                self.errors["username"] = self.error_class([u"個人IDまたは、SSOパスワードが異なります"])
         
         return cleaned_data
     
@@ -54,10 +53,9 @@ class RegistrationForm(forms.ModelForm):
         """保存処理"""
         user = super(RegistrationForm,self).save(commit=False)
         
-        user.set_password(self.cleaned_data["passwd"])
+        user.set_password(self.cleaned_data["sso_passwd"])
         user.sso_passwd = self.cleaned_data["sso_passwd"] #SSOパスワード
-        client = KoanClient(user.roleId,user.sso_passwd)
-        user.personnel_number = client.personal_data["personnel_number"] #学籍番号
+        user.update_from_sso(commit=False) #その他の情報を取得
         
         if commit:
             user.save()

@@ -62,7 +62,7 @@ class Student(User):
     
     sso_passwd = property(get_sso_passwd,set_sso_passwd)
     
-    def update_from_sso(self):
+    def update_from_sso(self,commit=True):
         """KOAN等にログインして情報を更新する"""
         try:
             client=KoanClient(self.username,self.sso_passwd)
@@ -70,7 +70,8 @@ class Student(User):
             return
         
         self.personnel_number = client.personal_data["personnel_number"]
-        self.save()
+        if commit:
+            self.save()
         
 class Rishu(models.Model):
     """履修"""
