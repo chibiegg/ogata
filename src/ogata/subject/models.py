@@ -11,6 +11,7 @@ from django.db.models.fields.related import ManyToManyRel
 from Crypto.Cipher import AES
 
 from django.conf import settings
+from ogata.koan import KoanClient
 
 class Course(models.Model):
     """科目"""
@@ -28,7 +29,6 @@ class Student(User):
     PADDING = '{'
     
     """学生"""
-    roleId = models.CharField(u"大阪大学個人ID",max_length=8)
     personnel_number = models.CharField(u"学籍番号",max_length=8)
     sso_passwd_encrypted = models.TextField(u"SSOパスワード",max_length=150)
     sso_passwd_iv = models.CharField(u"IV",max_length=16*3)
@@ -61,7 +61,17 @@ class Student(User):
         
     
     sso_passwd = property(get_sso_passwd,set_sso_passwd)
-
+    
+    def update_from_sso(self):
+        """KOAN等にログインして情報を更新する"""
+        try:
+            client=KoanClient(self.username,self.sso_passwd)
+        except KoanClient.LoginException:
+            return
+        
+        self.personnel_number = client.personal_data["personnel_number"]
+        self.save()
+        
 class Rishu(models.Model):
     """履修"""
     created = models.DateTimeField(u"追加日",auto_now_add = True)

@@ -108,6 +108,7 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',"ogata.koan.backend.SSOBackend")
 INSTALLED_APPS = (
     'ogata.koan',
     'ogata.subject',
