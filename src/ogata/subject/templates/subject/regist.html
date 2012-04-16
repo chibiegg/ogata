@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+
+{# <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8"> #}
+
+
+{% block pagetitle %}新規登録{% endblock %}
+
+{% block content %}
+
+<h2>新規登録</h2>
+
+<form action="." method="post">
+{% csrf_token %}
+<table>
+{{ form }}
+</table>
+<input type="submit" value="送信" />
+
+{% endblock %}

@@ -1,5 +1,8 @@
-#Fri Apr 13 09:54:07 JST 2012
+#Mon Apr 16 10:53:20 JST 2012
 eclipse.preferences.version=1
 encoding//src/ogata/koan/__init__.py=utf-8
 encoding//src/ogata/koan/parser.py=utf-8
+encoding//src/ogata/subject/forms.py=utf-8
 encoding//src/ogata/subject/models.py=utf-8
+encoding//src/ogata/subject/urls.py=utf-8
+encoding//src/ogata/subject/views.py=utf-8

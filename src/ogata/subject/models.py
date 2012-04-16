@@ -28,7 +28,8 @@ class Student(User):
     PADDING = '{'
     
     """学生"""
-    roleId = models.CharField(u"学籍番号",max_length=8)
+    roleId = models.CharField(u"大阪大学個人ID",max_length=8)
+    personnel_number = models.CharField(u"学籍番号",max_length=8)
     sso_passwd_encrypted = models.TextField(u"SSOパスワード",max_length=150)
     sso_passwd_iv = models.CharField(u"IV",max_length=16*3)
     
