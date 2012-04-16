@@ -11,6 +11,10 @@ from ogata.koan.parser import RishuParser
 class KoanClient(object):
     """KOANにアクセスするクラス"""
     
+    class LoginException(Exception):
+        """ログインエラー"""
+        pass
+    
     user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22"
     personal_data = {}
     
@@ -32,12 +36,12 @@ class KoanClient(object):
         url = "https://koan.osaka-u.ac.jp/koan/campus?view=view.menu&func=function.rishu.refer"
         response = opener.open(url)
         response = response.read().decode("utf-8")
-        keys = ("g_b_cd","g_cd")
-        for key in keys:
-            r = re.compile('name="%s" value="(?P<value>[^"]+)"' % key)
+        keys = (("g_b_cd","gakubu_code"),("g_cd","personnel_number"),)
+        for koan_key,key in keys:
+            r = re.compile('name="%s" value="(?P<value>[^"]+)"' % koan_key)
             m = r.search(response)
             self.personal_data[key] = m.group("value")
-        print self.personal_data
+        
         
     
     def login(self):
@@ -70,6 +74,9 @@ class KoanClient(object):
         #SAMLResponseを得るname="SAMLResponse" value="
         r = re.compile('name="SAMLResponse" value="(?P<SAMLResponse>[^"]+)"')
         m = r.search(response.read().decode("utf-8"))
+        if m == None:
+            raise self.LoginException()
+        
         SAMLResponse = m.group("SAMLResponse").replace("\n","").replace("\r","")
         
         #KOANへ移動
@@ -87,7 +94,7 @@ class KoanClient(object):
     def get_rishu(self,nendo,gakki):
         opener = self.get_urlopener()
         url = "https://koan.osaka-u.ac.jp/koan/campus?view=view.rishu.refer.html&func=function.rishu.refer.output&o_type=1&g_b_cd=%s&nendo=%d&gakki=%d&check=1&g_cd=%s&fukupro="
-        url = url % (self.personal_data["g_b_cd"],nendo,gakki,self.personal_data["g_cd"])
+        url = url % (self.personal_data["gakubu_code"],nendo,gakki,self.personal_data["personnel_number"])
         response = opener.open(url)
         rishu = RishuParser(response.read())
         return rishu
