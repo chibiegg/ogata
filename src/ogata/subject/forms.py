@@ -49,3 +49,17 @@ class RegistrationForm(forms.ModelForm):
                 self.errors["roleId"] = self.error_class([u"個人IDまたは、SSOパスワードが異なります"])
         
         return cleaned_data
+    
+    def save(self,commit=True):
+        """保存処理"""
+        user = super(RegistrationForm,self).save(commit=False)
+        
+        user.set_password(self.cleaned_data["passwd"])
+        user.sso_passwd = self.cleaned_data["sso_passwd"] #SSOパスワード
+        client = KoanClient(user.roleId,user.sso_passwd)
+        user.personnel_number = client.personal_data["personnel_number"] #学籍番号
+        
+        if commit:
+            user.save()
+            self.save_m2m()
+        return user
